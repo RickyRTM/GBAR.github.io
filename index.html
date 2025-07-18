@@ -273,90 +273,36 @@
     });
   }
 </script>
-    <script>
-// Lógica de instalación PWA
-let deferredPrompt;
-const installContainer = document.createElement('div');
-installContainer.id = 'pwa-install-container';
-installContainer.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 1000;
-    display: none;
-    max-width: 90%;
-    text-align: center;
-`;
-
-installContainer.innerHTML = `
-    <h3 style="margin-bottom: 15px; color: #2ba9d9; font-weight: 600;">¿Quieres instalar la aplicación GBAR?</h3>
-    <p style="margin-bottom: 15px;">Disfruta de una mejor experiencia instalando nuestra aplicación en tu dispositivo.</p>
-    <div style="display: flex; gap: 10px; justify-content: center;">
-        <button id="installPWA" style="padding: 8px 16px; background: #2ba9d9; color: white; border: none; border-radius: 5px; cursor: pointer;">Instalar</button>
-        <button id="cancelInstall" style="padding: 8px 16px; background: #f1f1f1; color: #333; border: none; border-radius: 5px; cursor: pointer;">Ahora no</button>
-    </div>
-`;
-
-document.body.appendChild(installContainer);
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
+<script>
+// Esperar a que la página cargue completamente
+window.addEventListener('load', () => {
+  // Mostrar el alert después de 3 segundos
+  setTimeout(() => {
+    const installConfirmed = confirm('¿Te gustaría descargar la aplicación GBAR para una mejor experiencia?');
     
-    // Mostrar el popup después de 5 segundos
-    setTimeout(() => {
-        installContainer.style.display = 'block';
-    }, 5000);
-});
-
-document.getElementById('installPWA').addEventListener('click', async () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            installContainer.style.display = 'none';
+    if (installConfirmed) {
+      // Lógica de instalación PWA
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        e.prompt();
+        
+        e.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Usuario aceptó instalar la PWA');
+          } else {
+            console.log('Usuario rechazó instalar la PWA');
+          }
+        });
+      });
+      
+      // Si el evento beforeinstallprompt no se dispara, mostrar mensaje alternativo
+      setTimeout(() => {
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          alert('Para instalar la aplicación, por favor usa el menú de tu navegador y selecciona "Instalar" o "Añadir a pantalla de inicio"');
         }
-        deferredPrompt = null;
+      }, 1000);
     }
-    installContainer.style.display = 'none';
-});
-
-document.getElementById('cancelInstall').addEventListener('click', () => {
-    installContainer.style.display = 'none';
-    // Opcional: Guardar en localStorage para no mostrar de nuevo
-    localStorage.setItem('pwaInstallDismissed', 'true');
-});
-
-// Verificar si ya se ha descartado antes
-if (localStorage.getItem('pwaInstallDismissed')) {
-    installContainer.style.display = 'none';
-}
-
-// También puedes agregar un botón permanente en el footer
-const installFooter = document.createElement('div');
-installFooter.style.cssText = `
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    z-index: 999;
-`;
-installFooter.innerHTML = `
-    <button id="manualInstall" style="background: #2ba9d9; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">↓</button>
-`;
-
-document.body.appendChild(installFooter);
-
-document.getElementById('manualInstall').addEventListener('click', () => {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-    } else {
-        installContainer.style.display = 'block';
-    }
+  }, 3000); // 3 segundos de retraso
 });
 </script>
   </body>
