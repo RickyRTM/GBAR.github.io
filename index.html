@@ -274,22 +274,26 @@
   }
 </script>
 <script>
-// Esperar a que la página cargue completamente
+// Solo el código esencial del Service Worker/PWA
 window.addEventListener('load', () => {
-  // Lógica de instalación PWA silenciosa
+  // Registrar el Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/js/serviceWorker.js')
+      .then(registration => {
+        console.log('ServiceWorker registrado con éxito:', registration.scope);
+      })
+      .catch(error => {
+        console.log('Error al registrar ServiceWorker:', error);
+      });
+  }
+
+  // Mantener la lógica de instalación pero sin UI
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
-    // Guardamos el evento para poder mostrarlo más tarde
     window.deferredPrompt = e;
-    
-    // Opcional: puedes agregar un botón de instalación manual en tu UI
-    // y usarlo para llamar a deferredPrompt.prompt() cuando el usuario lo clique
+    console.log('La PWA está lista para instalación');
+    // Aquí se captura el evento pero no se muestra nada al usuario
   });
-
-  // Verificar si ya está instalado
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('La aplicación está instalada');
-  }
 });
 </script>
   </body>
