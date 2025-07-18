@@ -273,37 +273,6 @@
     });
   }
 </script>
-<script>
-// Esperar a que la página cargue completamente
-window.addEventListener('load', () => {
-  // Mostrar el alert después de 3 segundos
-  setTimeout(() => {
-    const installConfirmed = confirm('¿Te gustaría descargar la aplicación GBAR para una mejor experiencia?');
-    
-    if (installConfirmed) {
-      // Lógica de instalación PWA
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        e.prompt();
-        
-        e.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('Usuario aceptó instalar la PWA');
-          } else {
-            console.log('Usuario rechazó instalar la PWA');
-          }
-        });
-      });
-      
-      // Si el evento beforeinstallprompt no se dispara, mostrar mensaje alternativo
-      setTimeout(() => {
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-          alert('Para instalar la aplicación, por favor usa el menú de tu navegador y selecciona "Instalar" o "Añadir a pantalla de inicio"');
-        }
-      }, 1000);
-    }
-  }, 3000); // 3 segundos de retraso
-});
-</script>
+
   </body>
 </html>
