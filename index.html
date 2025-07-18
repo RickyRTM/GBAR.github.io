@@ -273,6 +273,24 @@
     });
   }
 </script>
+<script>
+// Esperar a que la página cargue completamente
+window.addEventListener('load', () => {
+  // Lógica de instalación PWA silenciosa
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    // Guardamos el evento para poder mostrarlo más tarde
+    window.deferredPrompt = e;
+    
+    // Opcional: puedes agregar un botón de instalación manual en tu UI
+    // y usarlo para llamar a deferredPrompt.prompt() cuando el usuario lo clique
+  });
 
+  // Verificar si ya está instalado
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('La aplicación está instalada');
+  }
+});
+</script>
   </body>
 </html>
