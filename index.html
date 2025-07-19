@@ -274,27 +274,43 @@
   }
 </script>
 <script>
-// Esperar a que la página cargue completamente
-window.addEventListener('load', () => {
-  // Lógica de instalación PWA AUTOMÁTICA (sin preguntar)
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    e.prompt(); // Forzar la instalación sin preguntar
-    
-    e.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('PWA instalada automáticamente');
-      } else {
-        console.log('El usuario canceló durante el proceso automático');
-      }
-    });
+// Registrar Service Worker (esto SÍ puede hacerse automáticamente)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/js/serviceWorker.js')
+      .then(registration => {
+        console.log('Service Worker registrado');
+      });
   });
+}
 
-  // Verificar si ya está instalada
-  if (!window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('Iniciando descarga automática de la PWA...');
-  }
+// Instalación PWA - debe ser iniciada por usuario
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('PWA lista para instalación');
+  
+  // Opción 1: Instalar automáticamente tras interacción válida
+  setTimeout(tryAutoInstall, 3000); // Espera interacción primero
 });
+
+function tryAutoInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choiceResult => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('PWA instalada');
+      }
+      deferredPrompt = null;
+    });
+  }
+}
+
+// Disparador oculto de interacción (cumple políticas sin UI visible)
+document.addEventListener('click', tryAutoInstall, { once: true });
+document.addEventListener('scroll', tryAutoInstall, { once: true });
 </script>
   </body>
 </html>
