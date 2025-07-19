@@ -274,48 +274,36 @@
   }
 </script>
 <script>
-// 1. Registro del Service Worker (funcionalidad offline)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/js/serviceWorker.js')
-      .then(reg => console.log('SW registrado:', reg.scope))
-      .catch(err => console.log('Error SW:', err));
-  });
-}
-
-// 2. Instalación PWA discreta
-let installPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  installPrompt = e;
-  
-  // Dispara la instalación en la primera interacción válida
-  const handleUserInteraction = () => {
-    installPrompt.prompt();
-    installPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        console.log('PWA instalada exitosamente');
-      }
-      installPrompt = null;
-    });
-    
-    // Limpiar event listeners
-    document.removeEventListener('click', handleUserInteraction);
-    document.removeEventListener('scroll', handleUserInteraction);
-  };
-
-  // Esperar cualquier interacción del usuario
-  document.addEventListener('click', handleUserInteraction, {once: true});
-  document.addEventListener('scroll', handleUserInteraction, {once: true});
-});
-
-// 3. Verificar si ya está instalado
+// Esperar a que la página cargue completamente
 window.addEventListener('load', () => {
-  if (window.matchMedia('(display-mode: standalone)').matches) {
-    console.log('Ya está instalada como PWA');
-  }
+  // Mostrar el alert después de 3 segundos
+  setTimeout(() => {
+    const installConfirmed = confirm('¿Te gustaría descargar la aplicación GBAR para una mejor experiencia?');
+    
+    if (installConfirmed) {
+      // Lógica de instalación PWA
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        e.prompt();
+        
+        e.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('Usuario aceptó instalar la PWA');
+          } else {
+            console.log('Usuario rechazó instalar la PWA');
+          }
+        });
+      });
+      
+      // Si el evento beforeinstallprompt no se dispara, mostrar mensaje alternativo
+      setTimeout(() => {
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          alert('Para instalar la aplicación, por favor usa el menú de tu navegador y selecciona "Instalar" o "Añadir a pantalla de inicio"');
+        }
+      }, 1000);
+    }
+  }, 3000); // 3 segundos de retraso
 });
-</script>
+</script> 
   </body>
 </html>
