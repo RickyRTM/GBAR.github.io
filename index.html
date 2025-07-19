@@ -274,43 +274,48 @@
   }
 </script>
 <script>
-// Registrar Service Worker (esto SÍ puede hacerse automáticamente)
+// 1. Registro del Service Worker (funcionalidad offline)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/js/serviceWorker.js')
-      .then(registration => {
-        console.log('Service Worker registrado');
-      });
+      .then(reg => console.log('SW registrado:', reg.scope))
+      .catch(err => console.log('Error SW:', err));
   });
 }
 
-// Instalación PWA - debe ser iniciada por usuario
-let deferredPrompt;
+// 2. Instalación PWA discreta
+let installPrompt;
 
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
-  deferredPrompt = e;
-  console.log('PWA lista para instalación');
+  installPrompt = e;
   
-  // Opción 1: Instalar automáticamente tras interacción válida
-  setTimeout(tryAutoInstall, 3000); // Espera interacción primero
+  // Dispara la instalación en la primera interacción válida
+  const handleUserInteraction = () => {
+    installPrompt.prompt();
+    installPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        console.log('PWA instalada exitosamente');
+      }
+      installPrompt = null;
+    });
+    
+    // Limpiar event listeners
+    document.removeEventListener('click', handleUserInteraction);
+    document.removeEventListener('scroll', handleUserInteraction);
+  };
+
+  // Esperar cualquier interacción del usuario
+  document.addEventListener('click', handleUserInteraction, {once: true});
+  document.addEventListener('scroll', handleUserInteraction, {once: true});
 });
 
-function tryAutoInstall() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choiceResult => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('PWA instalada');
-      }
-      deferredPrompt = null;
-    });
+// 3. Verificar si ya está instalado
+window.addEventListener('load', () => {
+  if (window.matchMedia('(display-mode: standalone)').matches) {
+    console.log('Ya está instalada como PWA');
   }
-}
-
-// Disparador oculto de interacción (cumple políticas sin UI visible)
-document.addEventListener('click', tryAutoInstall, { once: true });
-document.addEventListener('scroll', tryAutoInstall, { once: true });
+});
 </script>
   </body>
 </html>
